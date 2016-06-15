@@ -10,13 +10,19 @@ Markov::Markov()
 Markov::Markov(vector<sequence *> *data)
 {
     this->data=data;
+    for(int i=0;i<4;i++)
+        for(int j=0;j<4;j++){
+            matrix_minus[i][j]=0;
+            matrix_plus[i][j]=0;
+        }
+
 }
 
 void Markov::compute_matrixes()
 {
     for(int i=0;i<data->size();i++){
         vector <char>* seq_nuc=data->at(i)->seq_nuc;
-        vector <pair<int,int>>* Intron_ids=data->at(i)->Intron_ids;
+        vector <int>* Intron_ids=data->at(i)->Intron_ids;
         int intron_counter=0;
         int case_number=1;
         for(int j=0;j<seq_nuc->size()-1;j++){
@@ -24,20 +30,27 @@ void Markov::compute_matrixes()
             {
             case 1:
                 add_to_matrix(matrix_minus,seq_nuc->at(j),seq_nuc->at(j+1));
-                if(Intron_ids->at(intron_counter).first==j+1)
-                    case_number=2;
+                if(intron_counter<Intron_ids->size())
+                    if(Intron_ids->at(intron_counter)==j+1){
+                        case_number=2;
+                        intron_counter++;
+                    }
                 break;
 
             case 2:
                 add_to_matrix(matrix_plus,seq_nuc->at(j),seq_nuc->at(j+1));
-                if(Intron_ids->at(intron_counter).second==j+1){
+                if(Intron_ids->at(intron_counter)==j+1){
                     case_number=1;
                     intron_counter++;
                 }
+                break;
             }
 
         }
     }
+    finalize_matrix(matrix_minus);
+    finalize_matrix(matrix_plus);
+
 }
 
 void Markov::add_to_matrix(double matrix[][4], char nuc1, char nuc2)
@@ -75,6 +88,21 @@ void Markov::add_to_matrix(double matrix[][4], char nuc1, char nuc2)
     else if(nuc1=='T'&&nuc2=='T')
         matrix[3][3]++;
 
+}
+
+void Markov::finalize_matrix(double matrix[][4])
+{
+    for(int i=0;i<4;i++){
+        int sum_row=matrix[i][0]+matrix[i][1]+matrix[i][2]+matrix[i][3];
+        for(int j=0;j<4;j++){
+            matrix[i][j]=matrix[i][j]/sum_row;
+        }
+    }
+}
+
+void Markov::set_data(vector<sequence *> *data)
+{
+    this->data=data;
 }
 
 

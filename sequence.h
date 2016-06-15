@@ -6,9 +6,9 @@ using namespace std;
 class sequence
 {
 public:
-    sequence(vector <char>* seq_nuc,vector <pair<int,int>>* Intron_ids);
+    sequence(vector <char>* seq_nuc, vector<int> *Intron_ids);
     vector <char>* seq_nuc;//sekwencja nukleotydow
-    vector <pair<int,int>>* Intron_ids;//pary poczatku i konca intronu
+    vector <int>* Intron_ids;//pary poczatku i konca intronu
 
 };
 
