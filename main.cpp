@@ -29,7 +29,7 @@ istream &operator>> (istream &in, Seq &s);
 vector<Seq> seq;
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    //QCoreApplication a(argc, argv);
 
 
 //---------------------------------------------------------------------------------
@@ -38,30 +38,53 @@ int main(int argc, char *argv[])
 
 //---------------------------------------------------------------------------------
 
+    int window2=8;
+    int window=200;
+    if (argc < 2) {
+                // Tell the user how to run the program
+                cerr << "Usage: " << argv[0] << " error" << endl;
 
+                return 1;
+        }
+    window2=atoi(argv[1]);
+    window=atoi(argv[2]);
     ifstream fdat("araclean.dat");
 
     if (!fdat.is_open()) {
         cerr << "Can't open file!" << endl;
         return 0;
     }
-    vector <sequence*>* data=new vector<sequence*>();
+    vector <sequence*>* data_in=new vector<sequence*>();
+    vector <sequence*>* data_test=new vector<sequence*>();
     int N=142;
     seq.resize(N);
-    for (int i = 0; i <= N-1; ++i) {
+    for (int i = 0; i <= N*3/4; ++i) {
         cout << "SEQ:  " << i << endl;
         fdat >> seq[i];
         vector <int>* introns_ids=new vector<int>(seq[i].introns);
         vector <char>* sec_nec=new vector <char>(seq[i].data) ;
-        data->push_back(new sequence(sec_nec,introns_ids));
+        data_in->push_back(new sequence(sec_nec,introns_ids));
         cout << "INT:  " << seq[i].introns << endl;
 //        cout << "EXO:  " << seq[i].exons << endl;
         cout << "DLEN: " << seq[i].data.size() << endl;
         cout << endl;
     }
+
+    for (int i = N*3/4; i <= N-1; ++i) {
+        cout << "SEQ:  " << i << endl;
+        fdat >> seq[i];
+        vector <int>* introns_ids=new vector<int>(seq[i].introns);
+        vector <char>* sec_nec=new vector <char>(seq[i].data) ;
+        data_test->push_back(new sequence(sec_nec,introns_ids));
+        cout << "INT:  " << seq[i].introns << endl;
+//        cout << "EXO:  " << seq[i].exons << endl;
+        cout << "DLEN: " << seq[i].data.size() << endl;
+        cout << endl;
+    }
+
         fdat.close();
-    Markov mark(data);
-    mark.compute_matrixes();
+    Markov mark(data_in);
+    mark.compute_matrixes(window2);
     for(int i=0;i<4;i++){
         for(int j=0;j<4;j++){
             cout<<mark.matrix_plus[i][j]<<'\t';
@@ -73,11 +96,29 @@ int main(int argc, char *argv[])
 
     for(int i=0;i<4;i++){
         for(int j=0;j<4;j++){
-            cout<<mark.matrix_minus[i][j]<<'\t';
+            cout<<log(mark.matrix_minus[i][j])<<'\t';
         }
         cout<<endl;
     }
 
+    mark.set_data(data_test);
+    mark.search_for_cut_placement(window,window2);
+    int n=mark.result->size();
+    for(int j=0;j<n;j++){
+        cout<<"Wynik "<<j<<endl;
+        cout<<*(mark.result->at(j)->original_Intron_ids)<<endl;
+        cout<<"Rezultat"<<endl;
+        cout<<*(mark.result->at(j)->result_Intron_ids)<<endl;
+    }
+    mark.set_data(data_in);
+    mark.search_for_cut_placement(window,window2);
+    n=mark.result->size();
+    for(int j=0;j<n;j++){
+        cout<<"Wynik "<<j<<endl;
+        cout<<*(mark.result->at(j)->original_Intron_ids)<<endl;
+        cout<<"Rezultat "<<j<<endl;
+        cout<<*(mark.result->at(j)->result_Intron_ids)<<endl;
+    }
 
 
 
