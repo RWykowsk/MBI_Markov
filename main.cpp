@@ -1,4 +1,3 @@
-#include <QCoreApplication>
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -42,7 +41,8 @@ int main(int argc, char *argv[])
     int window=200;
     if (argc < 2) {
                 // Tell the user how to run the program
-                cerr << "Usage: " << argv[0] << " error" << endl;
+                //cerr << "Usage: " << argv[0] << " error" << endl;
+				cerr << "Usage: " << argv[0] << " window-1 window-2" << endl;
 
                 return 1;
         }
